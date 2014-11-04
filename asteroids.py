@@ -109,7 +109,7 @@ class Ship:
         self.pos[0] = (self.pos[0] + self.vel[0]) % WIDTH 
         self.pos[1] = (self.pos[1] + self.vel[1]) % HEIGHT
         self.angle += self.angle_vel
-        c = 0.2
+        c = 0.1
         self.vel[0] *= (1-c)
         self.vel[1] *= (1-c)
         
@@ -136,6 +136,10 @@ class Ship:
         ship_thrust_sound.pause()
         ship_thrust_sound.rewind()
         
+    def shoot(self):
+        global a_misile
+        #a_misile = Sprite(mis_pos,mis_vel,0,0,missile_image, missile_info, missile_sound)
+        
 # Sprite class
 class Sprite:
     def __init__(self, pos, vel, ang, ang_vel, image, info, sound = None):
@@ -155,10 +159,12 @@ class Sprite:
             sound.play()
    
     def draw(self, canvas):
-        canvas.draw_circle(self.pos, self.radius, 1, "Red", "Red")
-    
+        canvas.draw_image(self.image, self.image_center, self.image_size, self.pos, self.image_size, self.angle)
+        
     def update(self):
-        pass        
+        self.angle += self.angle_vel
+        self.pos[0] = (self.pos[0] + self.vel[0]) % WIDTH
+        self.pos[1] = (self.pos[1] + self.vel[1]) % HEIGHT       
 
            
 def draw(canvas):
@@ -182,16 +188,26 @@ def draw(canvas):
     my_ship.update()
     a_rock.update()
     a_missile.update()
-            
+    
+    #TODO: update lives & scores
+    canvas.draw_text("Score",(50,50),36,"White","monospace")
+    canvas.draw_text(str(score),(50,100),36,"White","monospace")
+    canvas.draw_text("Lives",(650,50),36,"White","monospace")
+    canvas.draw_text(str(lives),(650,100),36,"White","monospace")
 # timer handler that spawns a rock    
 def rock_spawner():
-    pass
+    global a_rock
+    position = [random.randrange(a_rock.radius, WIDTH - a_rock.radius),a_rock.radius, HEIGHT - a_rock.radius]
+    velocity = [random.randrange(-2,2),random.randrange(-2,2)]
+    ang_velocity = float(random.randrange(-2,3)) / 15 
+    #print ang_velocity
+    a_rock = Sprite(position, velocity, 0, ang_velocity, asteroid_image, asteroid_info)
     
 def keydown(key):
     if key == simplegui.KEY_MAP['up']:
         my_ship.move()
-    elif key == simplegui.KEY_MAP['down']:
-        my_ship.stop_move()
+    elif key == simplegui.KEY_MAP['space']:
+        my_ship.shoot()
     elif key == simplegui.KEY_MAP['left']:
         my_ship.rotate('left')
     elif key == simplegui.KEY_MAP['right']:
@@ -199,7 +215,7 @@ def keydown(key):
         
 def keyup(key):
     if key == simplegui.KEY_MAP['up']:
-        my_ship.move()
+        my_ship.stop_move()
     elif key == simplegui.KEY_MAP['down']:
         my_ship.stop_move()
     elif key == simplegui.KEY_MAP['left']:
@@ -213,9 +229,8 @@ frame.set_keydown_handler(keydown)
 frame.set_keyup_handler(keyup)
 # initialize ship and two sprites
 my_ship = Ship([WIDTH / 2, HEIGHT / 2], [0.1, 0.1], 35, ship_image, ship_info)
-a_rock = Sprite([WIDTH / 3, HEIGHT / 3], [1, 1], 0, 0, asteroid_image, asteroid_info)
 a_missile = Sprite([2 * WIDTH / 3, 2 * HEIGHT / 3], [-1,1], 0, 0, missile_image, missile_info, missile_sound)
-
+a_rock = Sprite([WIDTH / 3, HEIGHT / 3], [1, 1], 0, 0.1, asteroid_image, asteroid_info)
 # register handlers
 frame.set_draw_handler(draw)
 
