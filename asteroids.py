@@ -109,9 +109,9 @@ class Ship:
         self.pos[0] = (self.pos[0] + self.vel[0]) % WIDTH 
         self.pos[1] = (self.pos[1] + self.vel[1]) % HEIGHT
         self.angle += self.angle_vel
-        c = 0.1
-        self.vel[0] *= (1-c)
-        self.vel[1] *= (1-c)
+        #friction 
+        self.vel[0] *= 0.950
+        self.vel[1] *= 0.950
         
         forward = angle_to_vector(self.angle)
         if self.thrust:
@@ -137,9 +137,17 @@ class Ship:
         ship_thrust_sound.rewind()
         
     def shoot(self):
-        global a_misile
-        #a_misile = Sprite(mis_pos,mis_vel,0,0,missile_image, missile_info, missile_sound)
-        
+        global a_missile
+        missile_pos = [0,0]
+        missile_vel = [0,0]
+        angle = 0
+        c = 10
+        missile_pos[0] = self.pos[0] + self.radius*math.cos(self.angle)
+        missile_pos[1] = self.pos[1] + self.radius*math.sin(self.angle)
+        missile_vel[0] = self.vel[0] + c * angle_to_vector(self.angle)[0]
+        missile_vel[1] = self.vel[1] + c * angle_to_vector(self.angle)[1]
+        a_missile = Sprite(missile_pos,missile_vel, angle, 0, missile_image, missile_info, missile_sound)
+
 # Sprite class
 class Sprite:
     def __init__(self, pos, vel, ang, ang_vel, image, info, sound = None):
